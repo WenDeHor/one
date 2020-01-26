@@ -26,7 +26,7 @@ public class User extends AbstrsctNameEntity {
     @NotBlank
     @Email
     @Size(min = 2, max = 50)
-    private String emale;
+    private String email;
 
     @Column(name = "fone_namber", nullable = false)
     @Range(min = 6, max = 10, message = "format 068 123 45 67")
@@ -55,10 +55,10 @@ public class User extends AbstrsctNameEntity {
        public User() {
     }
 
-    public User(Integer id, String name, String soname, String emale, Integer fone, Integer adres, Integer age, Collection<Role> roles) {
+    public User(Integer id, String name, String soname, String email, Integer fone, Integer adres, Integer age, Collection<Role> roles) {
         super(id, name);
         this.soname=soname;
-        this.emale=emale;
+        this.email = email;
         this.fone=fone;
         this.adres=adres;
         this.age=age;
@@ -77,12 +77,12 @@ public class User extends AbstrsctNameEntity {
         this.soname = soname;
     }
 
-    public String getEmale() {
-        return emale;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmale(String emale) {
-        this.emale = emale;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Integer getFone() {
@@ -129,7 +129,7 @@ public class User extends AbstrsctNameEntity {
     public String toString() {
         return "User{" +
                 "soname='" + soname + '\'' +
-                ", emale='" + emale + '\'' +
+                ", emale='" + email + '\'' +
                 ", fone=" + fone +
                 ", adres=" + adres +
                 ", age=" + age +
@@ -147,7 +147,7 @@ public class User extends AbstrsctNameEntity {
         if (!super.equals(o)) return false;
         User user = (User) o;
         return soname.equals(user.soname) &&
-                emale.equals(user.emale) &&
+                email.equals(user.email) &&
                 fone.equals(user.fone) &&
                 adres.equals(user.adres) &&
                 age.equals(user.age) &&
@@ -157,6 +157,6 @@ public class User extends AbstrsctNameEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), soname, emale, fone, adres, age, roles, dogsList);
+        return Objects.hash(super.hashCode(), soname, email, fone, adres, age, roles, dogsList);
     }
 }
