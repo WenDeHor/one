@@ -1,0 +1,417 @@
+Index: src/main/java/ua/onemace/prog/model/AbstrsctNameEntity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ua/onemace/prog/model/AbstrsctNameEntity.java	(revision cbe4bda594735c45b328afb607efab48064026a4)
++++ src/main/java/ua/onemace/prog/model/AbstrsctNameEntity.java	(date 1580045284035)
+@@ -11,4 +11,28 @@
+     @Size(min = 2, max = 10)
+     @Column(name = "name", nullable = false)
+     protected String name;
++
++    public AbstrsctNameEntity() {
++    }
++
++    public AbstrsctNameEntity(Integer id, String name) {
++        super(id);
++        this.name=name;
++    }
++
++    public String getName() {
++        return name;
++    }
++
++    public void setName(String name) {
++        this.name = name;
++    }
++
++    @Override
++    public String toString() {
++        return "AbstrsctNameEntity{" +
++                "name='" + name + '\'' +
++                ", id=" + id +
++                '}';
++    }
+ }
+Index: src/main/java/ua/onemace/prog/model/AbstractBaseEntity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ua/onemace/prog/model/AbstractBaseEntity.java	(revision cbe4bda594735c45b328afb607efab48064026a4)
++++ src/main/java/ua/onemace/prog/model/AbstractBaseEntity.java	(date 1580045284105)
+@@ -3,6 +3,8 @@
+ import org.springframework.data.domain.Persistable;
+ 
+ import javax.persistence.*;
++import java.util.Objects;
++
+ @MappedSuperclass
+ @Access(AccessType.FIELD)
+ public abstract class AbstractBaseEntity implements Persistable<Integer> {
+@@ -12,4 +14,42 @@
+     //    @Column(name = "id", unique = true, nullable = false, columnDefinition = "integer default nextval('global_seq')")
+     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_seq")
+     protected Integer id;
++
++    public AbstractBaseEntity() {
++    }
++    public AbstractBaseEntity(Integer id) {
++        this.id=id;
++    }
++    @Override
++    public Integer getId() {
++        return id;
++    }
++
++    public void setId(Integer id) {
++        this.id = id;
++    }
++
++    @Override
++    public boolean isNew() {
++        return this.id == null;
++    }
++
++    @Override
++    public String toString() {
++        return getClass().getSimpleName()+":"+id;
++    }
++
++    @Override
++    public boolean equals(Object o) {
++        if (this == o) return true;
++        if (o == null || getClass() != o.getClass()) return false;
++        AbstractBaseEntity that = (AbstractBaseEntity) o;
++        return Objects.equals(id, that.id);
++    }
++
++    @Override
++    public int hashCode() {
++        return Objects.hash(id);
++    }
++
+ }
+Index: .idea/encodings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/encodings.xml	(revision cbe4bda594735c45b328afb607efab48064026a4)
++++ .idea/encodings.xml	(date 1580040891711)
+@@ -2,6 +2,5 @@
+ <project version="4">
+   <component name="Encoding">
+     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+-    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: src/main/java/ua/onemace/prog/model/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ua/onemace/prog/model/User.java	(revision cbe4bda594735c45b328afb607efab48064026a4)
++++ src/main/java/ua/onemace/prog/model/User.java	(date 1580048784030)
+@@ -1,6 +1,162 @@
+ package ua.onemace.prog.model;
+ 
+-public class User {
+-    private String sonsme;
++import org.hibernate.annotations.BatchSize;
++import org.hibernate.annotations.Cache;
++import org.hibernate.annotations.CacheConcurrencyStrategy;
++import org.hibernate.validator.constraints.Range;
++import org.springframework.util.CollectionUtils;
++
++import javax.persistence.*;
++import javax.validation.constraints.Email;
++import javax.validation.constraints.NotBlank;
++import javax.validation.constraints.Size;
++import java.util.*;
++
++@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
++@Entity
++@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id"}, name = "unique_user")})
++public class User extends AbstrsctNameEntity {
++
++    @Column(name = "soname", nullable = false)
++    @NotBlank
++    @Size(min = 2, max = 50)
++    private String soname;
++
++    @Column(name = "soname", nullable = false, unique = true)
++    @NotBlank
++    @Email
++    @Size(min = 2, max = 50)
+     private String emale;
++
++    @Column(name = "fone_namber", nullable = false)
++    @Range(min = 6, max = 10, message = "format 068 123 45 67")
++    private Integer fone;
++
++    @Column(name = "adres", nullable = false)
++    @Range(min = 2, max = 30, message = "address of residence")
++    private Integer adres;
++
++    @Column(name = "age", nullable = false)
++    @Range(min = 1, max = 30, message = "the owner's age")
++    private Integer age;
++
++    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
++    @Enumerated(EnumType.STRING)
++    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
++    @Column(name = "role")
++    @ElementCollection(fetch = FetchType.EAGER)
++    @BatchSize(size = 200)
++    private Set<Role> roles;
++
++    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
++    @OrderBy("name DESC")
++    protected List<Dogs> dogsList;
++
++       public User() {
++    }
++
++    public User(Integer id, String name, String soname, String emale, Integer fone, Integer adres, Integer age, Collection<Role> roles) {
++        super(id, name);
++        this.soname=soname;
++        this.emale=emale;
++        this.fone=fone;
++        this.adres=adres;
++        this.age=age;
++        setRoles(roles);
++    }
++
++    private void setRoles(Collection<Role> roles) {
++           this.roles= CollectionUtils.isEmpty(roles)? EnumSet.noneOf(Role.class):EnumSet.copyOf(roles);
++    }
++
++    public String getSoname() {
++        return soname;
++    }
++
++    public void setSoname(String soname) {
++        this.soname = soname;
++    }
++
++    public String getEmale() {
++        return emale;
++    }
++
++    public void setEmale(String emale) {
++        this.emale = emale;
++    }
++
++    public Integer getFone() {
++        return fone;
++    }
++
++    public void setFone(Integer fone) {
++        this.fone = fone;
++    }
++
++    public Integer getAdres() {
++        return adres;
++    }
++
++    public void setAdres(Integer adres) {
++        this.adres = adres;
++    }
++
++    public Integer getAge() {
++        return age;
++    }
++
++    public void setAge(Integer age) {
++        this.age = age;
++    }
++
++    public Set<Role> getRoles() {
++        return roles;
++    }
++
++    public void setRoles(Set<Role> roles) {
++        this.roles = roles;
++    }
++
++    public List<Dogs> getDogsList() {
++        return dogsList;
++    }
++
++    public void setDogsList(List<Dogs> dogsList) {
++        this.dogsList = dogsList;
++    }
++
++    @Override
++    public String toString() {
++        return "User{" +
++                "soname='" + soname + '\'' +
++                ", emale='" + emale + '\'' +
++                ", fone=" + fone +
++                ", adres=" + adres +
++                ", age=" + age +
++                ", roles=" + roles +
++                ", dogsList=" + dogsList +
++                ", name='" + name + '\'' +
++                ", id=" + id +
++                '}';
++    }
++
++    @Override
++    public boolean equals(Object o) {
++        if (this == o) return true;
++        if (o == null || getClass() != o.getClass()) return false;
++        if (!super.equals(o)) return false;
++        User user = (User) o;
++        return soname.equals(user.soname) &&
++                emale.equals(user.emale) &&
++                fone.equals(user.fone) &&
++                adres.equals(user.adres) &&
++                age.equals(user.age) &&
++                roles.equals(user.roles) &&
++                dogsList.equals(user.dogsList);
++    }
++
++    @Override
++    public int hashCode() {
++        return Objects.hash(super.hashCode(), soname, emale, fone, adres, age, roles, dogsList);
++    }
+ }
+Index: src/main/java/ua/onemace/prog/model/Goods.java
+===================================================================
+--- src/main/java/ua/onemace/prog/model/Goods.java	(revision cbe4bda594735c45b328afb607efab48064026a4)
++++ src/main/java/ua/onemace/prog/model/Dogs.java	(date 1580047424873)
+@@ -1,8 +1,108 @@
+ package ua.onemace.prog.model;
+ 
+-public class Goods {
++import org.ehcache.shadow.org.terracotta.context.annotations.ContextAttribute;
++import org.hibernate.annotations.OnDelete;
++import org.hibernate.annotations.OnDeleteAction;
++import org.hibernate.validator.constraints.Range;
++
++import javax.persistence.*;
++import javax.validation.constraints.NotBlank;
++import javax.validation.constraints.NotNull;
++import javax.validation.constraints.Size;
++import java.util.Objects;
++
++@Entity
++@Table(name = "dogs")
++public class Dogs extends AbstrsctNameEntity {
++
++    @Column(name = "discription", nullable = false)
++    @NotBlank(message = "General characteristics of the animal")
++    @Size(min = 2, max = 50)
+     private String discription;
+-    private Integer cost;
+-    private Boolean present;
++
++    @Column(name = "age", nullable = false)
++    @Range(min = 2, max = 30)
++    private Integer age;
++
++    @Column(name = "color", nullable = false)
++    @NotBlank(message = "The color of the animal")
++    @Size(min = 2, max = 50)
++    private String color;
++
++    @ManyToOne(fetch = FetchType.EAGER)
++    @JoinColumn(name = "user_id", nullable = false)
++    @OnDelete(action = OnDeleteAction.CASCADE)
++    @NotNull
++    private User user;
++
++    public Dogs() {
++    }
++
++    public Dogs(Integer id, String name, String discription, Integer age, String color) {
++        super(id, name);
++        this.discription = discription;
++        this.age = age;
++        this.color = color;
++    }
++
++    public String getDiscription() {
++        return discription;
++    }
++
++    public void setDiscription(String discription) {
++        this.discription = discription;
++    }
+ 
++    public Integer getAge() {
++        return age;
++    }
++
++    public void setAge(Integer age) {
++        this.age = age;
++    }
++
++    public String getColor() {
++        return color;
++    }
++
++    public void setColor(String color) {
++        this.color = color;
++    }
++
++    public User getUser() {
++        return user;
++    }
++
++    public void setUser(User user) {
++        this.user = user;
++    }
++
++    @Override
++    public String toString() {
++        return "Dogs{" +
++                "discription='" + discription + '\'' +
++                ", age=" + age +
++                ", color='" + color + '\'' +
++                ", user=" + user +
++                ", name='" + name + '\'' +
++                ", id=" + id +
++                '}';
++    }
++
++    @Override
++    public boolean equals(Object o) {
++        if (this == o) return true;
++        if (o == null || getClass() != o.getClass()) return false;
++        if (!super.equals(o)) return false;
++        Dogs dogs = (Dogs) o;
++        return discription.equals(dogs.discription) &&
++                age.equals(dogs.age) &&
++                color.equals(dogs.color) &&
++                user.equals(dogs.user);
++    }
++
++    @Override
++    public int hashCode() {
++        return Objects.hash(super.hashCode(), discription, age, color, user);
++    }
+ }
+Index: src/main/java/ua/onemace/prog/model/Role.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ua/onemace/prog/model/Role.java	(revision cbe4bda594735c45b328afb607efab48064026a4)
++++ src/main/java/ua/onemace/prog/model/Role.java	(date 1580040890358)
+@@ -1,7 +1,8 @@
+ package ua.onemace.prog.model;
+ 
+ public enum Role {
+-    ROLE_USER,
+-    ROLE_ADMIN
+-
++    ROLE_FATHER,
++    ROLE_MATHER,
++    ROLE_SISTER,
++    ROLE_BROTHER
+ }
