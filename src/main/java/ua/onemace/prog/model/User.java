@@ -14,7 +14,7 @@ import java.util.*;
 
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 @Entity
-@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id"}, name = "unique_user")})
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"}, name = "unique_user_email")})
 public class User extends AbstrsctNameEntity {
 
     @Column(name = "soname", nullable = false)

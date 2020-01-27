@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @Entity
-@Table(name = "dogs")
+@Table(name = "dogs", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id"}, name = "dogs_unique_user_datetime_idx")})
 public class Dogs extends AbstrsctNameEntity {
 
     @Column(name = "discription", nullable = false)

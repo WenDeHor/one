@@ -10,6 +10,7 @@ public interface UserService {
     List<User> getAll();
 
     User getOne(String name);
+    User getEmail(String email);
 
     void add(User user);
 }
